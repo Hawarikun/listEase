@@ -10,5 +10,6 @@ class ColorApp {
   static const primaryTextColor = Color.fromRGBO(255, 255, 255, 0.87);
 
   // decoration
+  static const boxColor=Color.fromRGBO(54, 54, 54, 1);
   static const borderColor = Color.fromRGBO(151, 151, 151, 1);
 }

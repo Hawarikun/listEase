@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ionicons/ionicons.dart';
 import 'package:list_ease/constant/colors.dart';
 
 class HomePage extends StatelessWidget {
@@ -8,42 +9,44 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           child: Column(
+            mainAxisSize: MainAxisSize.max,
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   IconButton(
                     onPressed: () {},
-                    icon: Icon(
-                      Icons.filter_list,
+                    icon: const Icon(
+                      Ionicons.filter,
                       size: 24,
                       color: ColorApp.primaryTextColor,
                     ),
                   ),
-                  Text(
+                  const Text(
                     "Index",
                     style: TextStyle(
                         fontSize: 20, color: ColorApp.primaryTextColor),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 42,
                     width: 42,
                     child: CircleAvatar(),
                   )
                 ],
               ),
-              Center(
+              Expanded(
                 child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Image.asset("assets/Checklist.png"),
-                    Text(
+                    const Text(
                       "What do you want to do today?",
                       style: TextStyle(color: ColorApp.primaryTextColor),
                     ),
-                    Text(
+                    const Text(
                       "Tap + to add your tasks",
                       style: TextStyle(color: ColorApp.primaryTextColor),
                     ),

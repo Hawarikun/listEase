@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:list_ease/constant/colors.dart';
-import 'package:list_ease/pages/home_page.dart';
+import 'package:list_ease/pages/main_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -16,9 +16,10 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         scaffoldBackgroundColor: ColorApp.primaryColor,
         primaryColor: ColorApp.secondColor,
+        // visualDensity: VisualDensity.adaptivePlatformDensity,
         useMaterial3: true,
       ),
-      home: HomePage(),
+      home: const MainPage(),
     );
   }
 }
