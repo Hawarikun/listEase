@@ -33,16 +33,6 @@ class _MainPageState extends State<MainPage> {
         itemCount: widgetOptions.length,
         itemBuilder: (context, index) => widgetOptions.elementAt(index),
         onPageChanged: (index) {
-          // if (index == 1 && pageController.page == 3) {
-          //   // Pindahkan langsung dari indeks 1 ke indeks 3
-          //   pageController.jumpToPage(3);
-          //   currentIndex = 3;
-          // } else if (index == 3 && pageController.page == 1) {
-          //   // Pindahkan langsung dari indeks 3 ke indeks 1
-          //   pageController.jumpToPage(1);
-          //   currentIndex = 1;
-          // }
-
           currentIndex = index;
 
           setState(() {
@@ -88,11 +78,7 @@ class _MainPageState extends State<MainPage> {
         ],
         currentIndex: currentIndex,
         onTap: (index) {
-          // if (index == 3) {
-          //   currentIndex = 2;
-          // } else {
           currentIndex = index;
-          // }
           pageController.jumpToPage(currentIndex);
 
           setState(() {
