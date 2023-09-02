@@ -60,27 +60,39 @@ class _MainPageState extends State<MainPage> {
         selectedItemColor: ColorApp.primaryTextColor,
         unselectedItemColor: ColorApp.primaryTextColor,
         // useLegacyColorScheme: false,
+
         items: [
-          menuNavBar(
-              currentIndex, 0, Ionicons.home, Ionicons.home_outline, "Home"),
-          menuNavBar(currentIndex, 1, Ionicons.calendar,
-              Ionicons.calendar_outline, "Calendar"),
-          const BottomNavigationBarItem(
-            icon: SizedBox.shrink(),
-            label: '',
-          ),
-          menuNavBar(
-              currentIndex, 2, Ionicons.time, Ionicons.time_outline, "Focused"),
-          menuNavBar(currentIndex, 3, Ionicons.person, Ionicons.person_outline,
-              "Profil"),
+          if (currentIndex == 0) ...[
+            menuNavBar(
+                currentIndex, 0, Ionicons.home, Ionicons.home_outline, "Home"),
+            menuNavBar(currentIndex, 1, Ionicons.calendar,
+                Ionicons.calendar_outline, "Calendar"),
+            const BottomNavigationBarItem(
+              icon: SizedBox.shrink(),
+              label: '',
+            ),
+            menuNavBar(currentIndex, 2, Ionicons.time, Ionicons.time_outline,
+                "Focused"),
+            menuNavBar(currentIndex, 3, Ionicons.person,
+                Ionicons.person_outline, "Profil"),
+          ] else ...[
+            menuNavBar(
+                currentIndex, 0, Ionicons.home, Ionicons.home_outline, "Home"),
+            menuNavBar(currentIndex, 1, Ionicons.calendar,
+                Ionicons.calendar_outline, "Calendar"),
+            menuNavBar(currentIndex, 2, Ionicons.time, Ionicons.time_outline,
+                "Focused"),
+            menuNavBar(currentIndex, 3, Ionicons.person,
+                Ionicons.person_outline, "Profil"),
+          ]
         ],
         currentIndex: currentIndex,
         onTap: (index) {
-          if (index == 3) {
-            currentIndex = 2;
-          } else {
-            currentIndex = index;
-          }
+          // if (index == 3) {
+          //   currentIndex = 2;
+          // } else {
+          currentIndex = index;
+          // }
           pageController.jumpToPage(currentIndex);
 
           setState(() {
@@ -89,11 +101,14 @@ class _MainPageState extends State<MainPage> {
           });
         },
       ),
-      floatingActionButton: FloatingActionButton(
-          onPressed: () {},
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
-          child: const Icon(Ionicons.add)),
+      floatingActionButton: Visibility(
+        visible: currentIndex == 0 ? true : false,
+        child: FloatingActionButton(
+            onPressed: () {},
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30.0)),
+            child: const Icon(Ionicons.add)),
+      ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }

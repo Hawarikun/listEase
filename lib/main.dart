@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:list_ease/constant/colors.dart';
 import 'package:list_ease/pages/main_page.dart';
 
@@ -14,6 +15,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
+        textTheme: GoogleFonts.latoTextTheme(),
         scaffoldBackgroundColor: ColorApp.primaryColor,
         primaryColor: ColorApp.secondColor,
         // visualDensity: VisualDensity.adaptivePlatformDensity,
