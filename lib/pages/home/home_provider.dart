@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:list_ease/models/category_model.dart';
 
 class HomeProvider extends ChangeNotifier {
   final TextEditingController _titleController = TextEditingController();
@@ -7,15 +8,16 @@ class HomeProvider extends ChangeNotifier {
   String _datePicked = "";
   String _timePicked = "";
 
-  final DateTime _currentDate = DateTime.now();
-  final TimeOfDay _currentTime = const TimeOfDay(hour: 0, minute: 0);
+  DateTime? _currentDate;
+  TimeOfDay? _currentTime;
 
   TextEditingController get titleController => _titleController;
   TextEditingController get descriptionController => _descriptionController;
   String get datePicked => _datePicked;
   String get timePicked => _timePicked;
-  DateTime get currentDate => _currentDate;
-  TimeOfDay get currentTime => _currentTime;
+  DateTime? get currentDate => _currentDate;
+  TimeOfDay? get currentTime => _currentTime;
+  CategoryModel? selectedCategory;
 
   set datePicked(String value) {
     _datePicked = value;
@@ -25,15 +27,22 @@ class HomeProvider extends ChangeNotifier {
     _datePicked = value;
   }
 
+  void selectCategory(CategoryModel? category) {
+    selectedCategory = category;
+    notifyListeners();
+  }
+
   Future<void> selectDate(BuildContext context) async {
     DateTime? pickedDate = await showDatePicker(
       context: context,
-      initialDate: currentDate,
+      initialDate: currentDate ?? DateTime.now(),
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
     );
 
     if (pickedDate != null) {
+      _currentDate = pickedDate;
+
       String formattedDate = DateFormat('dd MMM y').format(pickedDate);
 
       _datePicked = formattedDate;
@@ -41,10 +50,11 @@ class HomeProvider extends ChangeNotifier {
       TimeOfDay? pickedTime = await showTimePicker(
         initialEntryMode: TimePickerEntryMode.input,
         context: context,
-        initialTime: currentTime,
+        initialTime: currentTime ?? const TimeOfDay(hour: 0, minute: 0),
       );
 
       if (pickedTime != null) {
+        _currentTime = pickedTime;
         String formattedTime = DateFormat.Hm().format(
           DateTime(1, 1, 1, pickedTime.hour, pickedTime.minute),
         );
