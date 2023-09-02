@@ -34,7 +34,10 @@ dependencies:
   flutter:
     sdk: flutter
   google_fonts: ^5.1.0
+  intl: ^0.18.1
   ionicons: ^0.2.2
+  path_provider: ^2.1.1
+  provider: ^6.0.5
 
 dev_dependencies:
   flutter_lints: ^2.0.0
