@@ -77,8 +77,6 @@ class CustomBottomSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final homeProvider = Provider.of<HomeProvider>(context, listen: false);
-
     void _showDialog() {
       showDialog(
         context: context,
@@ -169,17 +167,34 @@ class CustomBottomSheet extends StatelessWidget {
               color: ColorApp.boxColor,
             ),
             padding: const EdgeInsets.only(top: 25, left: 24, right: 24),
-            height: 250,
+            height: 270,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                const Text(
-                  "Add Task",
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: ColorApp.primaryTextColor,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      "Add Task",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: ColorApp.primaryTextColor,
+                      ),
+                    ),
+                    Consumer<MainProvider>(
+                      builder: (context, mainProvider, _) => IconButton(
+                        onPressed: () {
+                          mainProvider.changeShowBottomSheet =
+                              !mainProvider.showBottomSheet;
+                        },
+                        icon: const Icon(
+                          Ionicons.close_outline,
+                          color: ColorApp.primaryTextColor,
+                        ),
+                      ),
+                    )
+                  ],
                 ),
                 const SizedBox(height: 14),
                 formTextField(homeProvider.titleController, "Title"),
@@ -215,9 +230,7 @@ class CustomBottomSheet extends StatelessWidget {
                         onPressed: () {
                           mainProvider.changeShowBottomSheet =
                               !mainProvider.showBottomSheet;
-                          homeProvider.titleController.clear();
-                          homeProvider.datePicked = "";
-                          homeProvider.timePicked = "";
+                          homeProvider.clear();
 
                           print(homeProvider.datePicked);
                         },

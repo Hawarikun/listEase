@@ -66,4 +66,14 @@ class HomeProvider extends ChangeNotifier {
     print(datePicked);
     print(timePicked);
   }
+
+  void clear() {
+    _titleController.clear();
+    _descriptionController.clear();
+    _currentDate = null;
+    _currentTime = null;
+    _datePicked = "";
+    _timePicked = "";
+    selectCategory(null);
+  }
 }
