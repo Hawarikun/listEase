@@ -4,6 +4,7 @@ import 'package:list_ease/constant/colors.dart';
 import 'package:list_ease/pages/calendar_page.dart';
 import 'package:list_ease/pages/focused_page.dart';
 import 'package:list_ease/pages/home_page.dart';
+import 'package:list_ease/pages/profil_page.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -23,7 +24,7 @@ class _MainPageState extends State<MainPage> {
       const CalendarPage(),
       // const SizedBox(),
       const FocusedPage(),
-      const SizedBox()
+      const ProfilPage()
     ];
 
     return Scaffold(
