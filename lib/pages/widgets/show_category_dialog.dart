@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 
 void showCategoryDialog(BuildContext context) {
   showDialog(
+    barrierDismissible: false,
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
@@ -27,7 +28,9 @@ void showCategoryDialog(BuildContext context) {
               onPressed: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (context) => const AddCategories(),
+                    builder: (context) => const AddCategories(
+                      category: null,
+                    ),
                   ),
                 );
               },
@@ -43,11 +46,12 @@ void showCategoryDialog(BuildContext context) {
             future: homeProvider.getAllCategories(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return const SizedBox(
-                    height: 50,
-                    width: 50,
-                    child:
-                        CircularProgressIndicator()); // Tampilkan indikator loading jika data sedang dimuat.
+                return const Center(
+                  child: SizedBox(
+                      height: 50,
+                      width: 50,
+                      child: CircularProgressIndicator()),
+                ); // Tampilkan indikator loading jika data sedang dimuat.
               } else if (snapshot.hasError) {
                 return Text("Error : ${snapshot.error}");
               } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
@@ -76,6 +80,21 @@ void showCategoryDialog(BuildContext context) {
                               homeProvider
                                   .selectCategory(snapshot.data![index]);
                               print(homeProvider.selectedCategory);
+                            },
+                            onLongPress: () {
+                              print(snapshot.data![index]);
+                              Navigator.of(context).push(
+                                MaterialPageRoute(builder: (context) {
+                                  if (snapshot.data != null) {
+                                    return AddCategories(
+                                      category: snapshot.data![index],
+                                    );
+                                  } else {
+                                    // Tampilkan pesan atau widget placeholder jika snapshot.data adalah null
+                                    return const CircularProgressIndicator(); // Contoh placeholder
+                                  }
+                                }),
+                              );
                             },
                             child: Container(
                               padding: const EdgeInsets.symmetric(vertical: 5),

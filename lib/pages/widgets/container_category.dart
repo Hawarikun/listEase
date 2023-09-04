@@ -5,10 +5,10 @@ import 'package:list_ease/services/database/database.dart';
 
 Widget containerCategory(Category data) {
   String unicodeValue =
-      data.icon.toUpperCase(); // Nilai Unicode dalam format heksadesimal
+      data.icon.toUpperCase();
 
   int codePoint = int.parse("0$unicodeValue",
-      radix: 16); // Mengonversi string heksadesimal menjadi integer
+      radix: 16); 
 
   IconData icon = IconData(
     codePoint,

@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_iconpicker/flutter_iconpicker.dart';
 import 'package:intl/intl.dart';
@@ -10,12 +11,15 @@ class HomeProvider extends ChangeNotifier {
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _categoryController = TextEditingController();
 
-  String _datePicked = "";
-  String _timePicked = "";
+  DateTime? _datePicked;
+  String? _timePicked;
   String? _colorCategory;
   String? _iconCategory;
 
-  IconData? _icon;
+  IconData? _iconData;
+  Color? _selectedColors;
+
+  // IconData? _icon;
 
   DateTime? _currentDate;
   TimeOfDay? _currentTime;
@@ -24,32 +28,37 @@ class HomeProvider extends ChangeNotifier {
   TextEditingController get descriptionController => _descriptionController;
   TextEditingController get categoryController => _categoryController;
 
-  // String get datePicked => _datePicked;
-  // String get timePicked => _timePicked;
+  DateTime? get datePicked => _datePicked;
+  String? get timePicked => _timePicked;
   String? get colorCategory => _colorCategory;
   String? get iconCategory => _iconCategory;
 
-  IconData? get icon => _icon;
+  IconData? get icon => _iconData;
   DateTime? get currentDate => _currentDate;
   TimeOfDay? get currentTime => _currentTime;
-  Category? selectedCategory;
-  Color? selectedColors;
+  Color? get selectedColors => _selectedColors;
 
-  set datePicked(String value) {
+  Category? selectedCategory;
+
+  set setDatePicked(DateTime value) {
     _datePicked = value;
   }
 
-  void getColor(String color) {
-    _colorCategory = color;
-    notifyListeners();
+  set setSelectedColor(Color? color) {
+    _selectedColors = color;
   }
 
-  set timePicked(String value) {
+  set setTimePicked(DateTime value) {
     _datePicked = value;
   }
 
   set setIcon(IconData? icon) {
-    _icon = icon;
+    _iconData = icon;
+    // notifyListeners();
+  }
+
+  void getColor(String color) {
+    _colorCategory = color;
     notifyListeners();
   }
 
@@ -58,10 +67,8 @@ class HomeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void selectColors(
-    Color? colors,
-  ) {
-    selectedColors = colors;
+  void selectColors(Color? colors) {
+    _selectedColors = colors;
 
     notifyListeners();
   }
@@ -70,7 +77,7 @@ class HomeProvider extends ChangeNotifier {
     IconData? icon = await FlutterIconPicker.showIconPicker(context,
         iconPackModes: [IconPack.material]);
 
-    _icon = icon;
+    _iconData = icon;
 
     IconData? iconData = icon;
     String unicodeValue = iconData!.codePoint.toRadixString(16);
@@ -80,6 +87,24 @@ class HomeProvider extends ChangeNotifier {
     notifyListeners();
 
     debugPrint('Picked Icon:  $icon');
+  }
+
+  // String to Color and Icon
+  void setData({String? iconUnicode, String? colorHex}) {
+    final codePoint = int.parse("0$iconUnicode", radix: 16);
+    _iconData = IconData(
+      codePoint,
+      fontFamily: 'MaterialIcons',
+    );
+
+    final colorValue = int.parse("0x${colorHex!.toUpperCase()}");
+    _selectedColors = Color(colorValue);
+
+    selectColors(Color(colorValue));
+
+    print(selectedColors);
+
+    // notifyListeners();
   }
 
   Future<void> selectDate(BuildContext context) async {
@@ -93,9 +118,7 @@ class HomeProvider extends ChangeNotifier {
     if (pickedDate != null) {
       _currentDate = pickedDate;
 
-      String formattedDate = DateFormat('dd MMM y').format(pickedDate);
-
-      _datePicked = formattedDate;
+      _datePicked = pickedDate;
 
       TimeOfDay? pickedTime = await showTimePicker(
         initialEntryMode: TimePickerEntryMode.input,
@@ -113,8 +136,14 @@ class HomeProvider extends ChangeNotifier {
       }
     }
 
+    notifyListeners();
+
     print(_datePicked);
     print(_timePicked);
+  }
+
+  Future<List<Category>> getAllCategories() async {
+    return await database.allCategories();
   }
 
   Future insert(String name, String icon, String color) async {
@@ -132,8 +161,34 @@ class HomeProvider extends ChangeNotifier {
     print(row);
   }
 
-  Future<List<Category>> getAllCategories() async {
-    return await database.allCategories();
+  Future update(
+      int newId, String newName, String newIcon, String newColor) async {
+    return await database.updateKategoriRepo(newId, newName, newIcon, newColor);
+  }
+
+  void updateIsComplete(int id, bool newCondition) async {
+    await database.updateIsCompleteToDos(id, newCondition);
+
+    notifyListeners();
+  }
+
+  Future insertToDos(int categoryId, String title, String description,
+      DateTime date, String time) async {
+    var now = DateTime.now();
+
+    final row = await database.into(database.toDos).insertReturning(
+          ToDosCompanion.insert(
+            category_id: Value(categoryId),
+            title: title,
+            description: description,
+            date: date,
+            time: time,
+            createdAt: now,
+            updateedAt: now,
+          ),
+        );
+
+    print(row);
   }
 
   void clear() {
@@ -141,8 +196,8 @@ class HomeProvider extends ChangeNotifier {
     _descriptionController.clear();
     _currentDate = null;
     _currentTime = null;
-    _datePicked = "";
-    _timePicked = "";
+    _datePicked = null;
+    _timePicked = null;
     selectCategory(null);
   }
 
@@ -150,7 +205,8 @@ class HomeProvider extends ChangeNotifier {
     _categoryController.clear();
     _colorCategory = null;
     _iconCategory = null;
-    _icon = null;
+    _iconData = null;
+    _selectedColors = null;
     selectColors(null);
   }
 }

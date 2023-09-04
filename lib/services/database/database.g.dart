@@ -375,7 +375,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
   }
 }
 
-class $ToDosTable extends ToDos with TableInfo<$ToDosTable, Todos> {
+class $ToDosTable extends ToDos with TableInfo<$ToDosTable, ToDo> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -389,6 +389,15 @@ class $ToDosTable extends ToDos with TableInfo<$ToDosTable, Todos> {
       requiredDuringInsert: false,
       defaultConstraints:
           GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  static const VerificationMeta _category_idMeta =
+      const VerificationMeta('category_id');
+  @override
+  late final GeneratedColumn<int> category_id = GeneratedColumn<int>(
+      'category_id', aliasedName, true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('REFERENCES categories (id)'));
   static const VerificationMeta _titleMeta = const VerificationMeta('title');
   @override
   late final GeneratedColumn<String> title = GeneratedColumn<String>(
@@ -404,12 +413,28 @@ class $ToDosTable extends ToDos with TableInfo<$ToDosTable, Todos> {
       additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 256),
       type: DriftSqlType.string,
       requiredDuringInsert: true);
-  static const VerificationMeta _dateWithTimeMeta =
-      const VerificationMeta('dateWithTime');
+  static const VerificationMeta _dateMeta = const VerificationMeta('date');
   @override
-  late final GeneratedColumn<DateTime> dateWithTime = GeneratedColumn<DateTime>(
-      'date_with_time', aliasedName, false,
+  late final GeneratedColumn<DateTime> date = GeneratedColumn<DateTime>(
+      'date', aliasedName, false,
       type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _timeMeta = const VerificationMeta('time');
+  @override
+  late final GeneratedColumn<String> time = GeneratedColumn<String>(
+      'time', aliasedName, false,
+      additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 128),
+      type: DriftSqlType.string,
+      requiredDuringInsert: true);
+  static const VerificationMeta _isCompletedMeta =
+      const VerificationMeta('isCompleted');
+  @override
+  late final GeneratedColumn<bool> isCompleted = GeneratedColumn<bool>(
+      'is_completed', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("is_completed" IN (0, 1))'),
+      defaultValue: const Constant(false));
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
@@ -429,19 +454,35 @@ class $ToDosTable extends ToDos with TableInfo<$ToDosTable, Todos> {
       'deletedd_at', aliasedName, true,
       type: DriftSqlType.dateTime, requiredDuringInsert: false);
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, title, description, dateWithTime, createdAt, updateedAt, deleteddAt];
+  List<GeneratedColumn> get $columns => [
+        id,
+        category_id,
+        title,
+        description,
+        date,
+        time,
+        isCompleted,
+        createdAt,
+        updateedAt,
+        deleteddAt
+      ];
   @override
   String get aliasedName => _alias ?? 'to_dos';
   @override
   String get actualTableName => 'to_dos';
   @override
-  VerificationContext validateIntegrity(Insertable<Todos> instance,
+  VerificationContext validateIntegrity(Insertable<ToDo> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('category_id')) {
+      context.handle(
+          _category_idMeta,
+          category_id.isAcceptableOrUnknown(
+              data['category_id']!, _category_idMeta));
     }
     if (data.containsKey('title')) {
       context.handle(
@@ -457,13 +498,23 @@ class $ToDosTable extends ToDos with TableInfo<$ToDosTable, Todos> {
     } else if (isInserting) {
       context.missing(_descriptionMeta);
     }
-    if (data.containsKey('date_with_time')) {
+    if (data.containsKey('date')) {
       context.handle(
-          _dateWithTimeMeta,
-          dateWithTime.isAcceptableOrUnknown(
-              data['date_with_time']!, _dateWithTimeMeta));
+          _dateMeta, date.isAcceptableOrUnknown(data['date']!, _dateMeta));
     } else if (isInserting) {
-      context.missing(_dateWithTimeMeta);
+      context.missing(_dateMeta);
+    }
+    if (data.containsKey('time')) {
+      context.handle(
+          _timeMeta, time.isAcceptableOrUnknown(data['time']!, _timeMeta));
+    } else if (isInserting) {
+      context.missing(_timeMeta);
+    }
+    if (data.containsKey('is_completed')) {
+      context.handle(
+          _isCompletedMeta,
+          isCompleted.isAcceptableOrUnknown(
+              data['is_completed']!, _isCompletedMeta));
     }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
@@ -491,17 +542,23 @@ class $ToDosTable extends ToDos with TableInfo<$ToDosTable, Todos> {
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  Todos map(Map<String, dynamic> data, {String? tablePrefix}) {
+  ToDo map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return Todos(
+    return ToDo(
       id: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      category_id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}category_id']),
       title: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}title'])!,
       description: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}description'])!,
-      dateWithTime: attachedDatabase.typeMapping.read(
-          DriftSqlType.dateTime, data['${effectivePrefix}date_with_time'])!,
+      date: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}date'])!,
+      time: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}time'])!,
+      isCompleted: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_completed'])!,
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
       updateedAt: attachedDatabase.typeMapping
@@ -517,19 +574,25 @@ class $ToDosTable extends ToDos with TableInfo<$ToDosTable, Todos> {
   }
 }
 
-class Todos extends DataClass implements Insertable<Todos> {
+class ToDo extends DataClass implements Insertable<ToDo> {
   final int id;
+  final int? category_id;
   final String title;
   final String description;
-  final DateTime dateWithTime;
+  final DateTime date;
+  final String time;
+  final bool isCompleted;
   final DateTime createdAt;
   final DateTime updateedAt;
   final DateTime? deleteddAt;
-  const Todos(
+  const ToDo(
       {required this.id,
+      this.category_id,
       required this.title,
       required this.description,
-      required this.dateWithTime,
+      required this.date,
+      required this.time,
+      required this.isCompleted,
       required this.createdAt,
       required this.updateedAt,
       this.deleteddAt});
@@ -537,9 +600,14 @@ class Todos extends DataClass implements Insertable<Todos> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
+    if (!nullToAbsent || category_id != null) {
+      map['category_id'] = Variable<int>(category_id);
+    }
     map['title'] = Variable<String>(title);
     map['description'] = Variable<String>(description);
-    map['date_with_time'] = Variable<DateTime>(dateWithTime);
+    map['date'] = Variable<DateTime>(date);
+    map['time'] = Variable<String>(time);
+    map['is_completed'] = Variable<bool>(isCompleted);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updateed_at'] = Variable<DateTime>(updateedAt);
     if (!nullToAbsent || deleteddAt != null) {
@@ -551,9 +619,14 @@ class Todos extends DataClass implements Insertable<Todos> {
   ToDosCompanion toCompanion(bool nullToAbsent) {
     return ToDosCompanion(
       id: Value(id),
+      category_id: category_id == null && nullToAbsent
+          ? const Value.absent()
+          : Value(category_id),
       title: Value(title),
       description: Value(description),
-      dateWithTime: Value(dateWithTime),
+      date: Value(date),
+      time: Value(time),
+      isCompleted: Value(isCompleted),
       createdAt: Value(createdAt),
       updateedAt: Value(updateedAt),
       deleteddAt: deleteddAt == null && nullToAbsent
@@ -562,14 +635,17 @@ class Todos extends DataClass implements Insertable<Todos> {
     );
   }
 
-  factory Todos.fromJson(Map<String, dynamic> json,
+  factory ToDo.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return Todos(
+    return ToDo(
       id: serializer.fromJson<int>(json['id']),
+      category_id: serializer.fromJson<int?>(json['category_id']),
       title: serializer.fromJson<String>(json['title']),
       description: serializer.fromJson<String>(json['description']),
-      dateWithTime: serializer.fromJson<DateTime>(json['dateWithTime']),
+      date: serializer.fromJson<DateTime>(json['date']),
+      time: serializer.fromJson<String>(json['time']),
+      isCompleted: serializer.fromJson<bool>(json['isCompleted']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updateedAt: serializer.fromJson<DateTime>(json['updateedAt']),
       deleteddAt: serializer.fromJson<DateTime?>(json['deleteddAt']),
@@ -580,39 +656,51 @@ class Todos extends DataClass implements Insertable<Todos> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
+      'category_id': serializer.toJson<int?>(category_id),
       'title': serializer.toJson<String>(title),
       'description': serializer.toJson<String>(description),
-      'dateWithTime': serializer.toJson<DateTime>(dateWithTime),
+      'date': serializer.toJson<DateTime>(date),
+      'time': serializer.toJson<String>(time),
+      'isCompleted': serializer.toJson<bool>(isCompleted),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updateedAt': serializer.toJson<DateTime>(updateedAt),
       'deleteddAt': serializer.toJson<DateTime?>(deleteddAt),
     };
   }
 
-  Todos copyWith(
+  ToDo copyWith(
           {int? id,
+          Value<int?> category_id = const Value.absent(),
           String? title,
           String? description,
-          DateTime? dateWithTime,
+          DateTime? date,
+          String? time,
+          bool? isCompleted,
           DateTime? createdAt,
           DateTime? updateedAt,
           Value<DateTime?> deleteddAt = const Value.absent()}) =>
-      Todos(
+      ToDo(
         id: id ?? this.id,
+        category_id: category_id.present ? category_id.value : this.category_id,
         title: title ?? this.title,
         description: description ?? this.description,
-        dateWithTime: dateWithTime ?? this.dateWithTime,
+        date: date ?? this.date,
+        time: time ?? this.time,
+        isCompleted: isCompleted ?? this.isCompleted,
         createdAt: createdAt ?? this.createdAt,
         updateedAt: updateedAt ?? this.updateedAt,
         deleteddAt: deleteddAt.present ? deleteddAt.value : this.deleteddAt,
       );
   @override
   String toString() {
-    return (StringBuffer('Todos(')
+    return (StringBuffer('ToDo(')
           ..write('id: $id, ')
+          ..write('category_id: $category_id, ')
           ..write('title: $title, ')
           ..write('description: $description, ')
-          ..write('dateWithTime: $dateWithTime, ')
+          ..write('date: $date, ')
+          ..write('time: $time, ')
+          ..write('isCompleted: $isCompleted, ')
           ..write('createdAt: $createdAt, ')
           ..write('updateedAt: $updateedAt, ')
           ..write('deleteddAt: $deleteddAt')
@@ -621,65 +709,84 @@ class Todos extends DataClass implements Insertable<Todos> {
   }
 
   @override
-  int get hashCode => Object.hash(
-      id, title, description, dateWithTime, createdAt, updateedAt, deleteddAt);
+  int get hashCode => Object.hash(id, category_id, title, description, date,
+      time, isCompleted, createdAt, updateedAt, deleteddAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is Todos &&
+      (other is ToDo &&
           other.id == this.id &&
+          other.category_id == this.category_id &&
           other.title == this.title &&
           other.description == this.description &&
-          other.dateWithTime == this.dateWithTime &&
+          other.date == this.date &&
+          other.time == this.time &&
+          other.isCompleted == this.isCompleted &&
           other.createdAt == this.createdAt &&
           other.updateedAt == this.updateedAt &&
           other.deleteddAt == this.deleteddAt);
 }
 
-class ToDosCompanion extends UpdateCompanion<Todos> {
+class ToDosCompanion extends UpdateCompanion<ToDo> {
   final Value<int> id;
+  final Value<int?> category_id;
   final Value<String> title;
   final Value<String> description;
-  final Value<DateTime> dateWithTime;
+  final Value<DateTime> date;
+  final Value<String> time;
+  final Value<bool> isCompleted;
   final Value<DateTime> createdAt;
   final Value<DateTime> updateedAt;
   final Value<DateTime?> deleteddAt;
   const ToDosCompanion({
     this.id = const Value.absent(),
+    this.category_id = const Value.absent(),
     this.title = const Value.absent(),
     this.description = const Value.absent(),
-    this.dateWithTime = const Value.absent(),
+    this.date = const Value.absent(),
+    this.time = const Value.absent(),
+    this.isCompleted = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updateedAt = const Value.absent(),
     this.deleteddAt = const Value.absent(),
   });
   ToDosCompanion.insert({
     this.id = const Value.absent(),
+    this.category_id = const Value.absent(),
     required String title,
     required String description,
-    required DateTime dateWithTime,
+    required DateTime date,
+    required String time,
+    this.isCompleted = const Value.absent(),
     required DateTime createdAt,
     required DateTime updateedAt,
     this.deleteddAt = const Value.absent(),
   })  : title = Value(title),
         description = Value(description),
-        dateWithTime = Value(dateWithTime),
+        date = Value(date),
+        time = Value(time),
         createdAt = Value(createdAt),
         updateedAt = Value(updateedAt);
-  static Insertable<Todos> custom({
+  static Insertable<ToDo> custom({
     Expression<int>? id,
+    Expression<int>? category_id,
     Expression<String>? title,
     Expression<String>? description,
-    Expression<DateTime>? dateWithTime,
+    Expression<DateTime>? date,
+    Expression<String>? time,
+    Expression<bool>? isCompleted,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updateedAt,
     Expression<DateTime>? deleteddAt,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (category_id != null) 'category_id': category_id,
       if (title != null) 'title': title,
       if (description != null) 'description': description,
-      if (dateWithTime != null) 'date_with_time': dateWithTime,
+      if (date != null) 'date': date,
+      if (time != null) 'time': time,
+      if (isCompleted != null) 'is_completed': isCompleted,
       if (createdAt != null) 'created_at': createdAt,
       if (updateedAt != null) 'updateed_at': updateedAt,
       if (deleteddAt != null) 'deletedd_at': deleteddAt,
@@ -688,17 +795,23 @@ class ToDosCompanion extends UpdateCompanion<Todos> {
 
   ToDosCompanion copyWith(
       {Value<int>? id,
+      Value<int?>? category_id,
       Value<String>? title,
       Value<String>? description,
-      Value<DateTime>? dateWithTime,
+      Value<DateTime>? date,
+      Value<String>? time,
+      Value<bool>? isCompleted,
       Value<DateTime>? createdAt,
       Value<DateTime>? updateedAt,
       Value<DateTime?>? deleteddAt}) {
     return ToDosCompanion(
       id: id ?? this.id,
+      category_id: category_id ?? this.category_id,
       title: title ?? this.title,
       description: description ?? this.description,
-      dateWithTime: dateWithTime ?? this.dateWithTime,
+      date: date ?? this.date,
+      time: time ?? this.time,
+      isCompleted: isCompleted ?? this.isCompleted,
       createdAt: createdAt ?? this.createdAt,
       updateedAt: updateedAt ?? this.updateedAt,
       deleteddAt: deleteddAt ?? this.deleteddAt,
@@ -711,14 +824,23 @@ class ToDosCompanion extends UpdateCompanion<Todos> {
     if (id.present) {
       map['id'] = Variable<int>(id.value);
     }
+    if (category_id.present) {
+      map['category_id'] = Variable<int>(category_id.value);
+    }
     if (title.present) {
       map['title'] = Variable<String>(title.value);
     }
     if (description.present) {
       map['description'] = Variable<String>(description.value);
     }
-    if (dateWithTime.present) {
-      map['date_with_time'] = Variable<DateTime>(dateWithTime.value);
+    if (date.present) {
+      map['date'] = Variable<DateTime>(date.value);
+    }
+    if (time.present) {
+      map['time'] = Variable<String>(time.value);
+    }
+    if (isCompleted.present) {
+      map['is_completed'] = Variable<bool>(isCompleted.value);
     }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
@@ -736,9 +858,12 @@ class ToDosCompanion extends UpdateCompanion<Todos> {
   String toString() {
     return (StringBuffer('ToDosCompanion(')
           ..write('id: $id, ')
+          ..write('category_id: $category_id, ')
           ..write('title: $title, ')
           ..write('description: $description, ')
-          ..write('dateWithTime: $dateWithTime, ')
+          ..write('date: $date, ')
+          ..write('time: $time, ')
+          ..write('isCompleted: $isCompleted, ')
           ..write('createdAt: $createdAt, ')
           ..write('updateedAt: $updateedAt, ')
           ..write('deleteddAt: $deleteddAt')

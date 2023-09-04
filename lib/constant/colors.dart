@@ -12,4 +12,5 @@ class ColorApp {
   // decoration
   static const boxColor=Color.fromRGBO(54, 54, 54, 1);
   static const borderColor = Color.fromRGBO(151, 151, 151, 1);
+  static const errorColor = Color.fromRGBO(255, 73, 73, 1);
 }

@@ -1,15 +1,42 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:list_ease/constant/colors.dart';
 import 'package:list_ease/constant/dummy_data.dart';
 import 'package:list_ease/pages/home/home_provider.dart';
+import 'package:list_ease/pages/main_page/main_page.dart';
+import 'package:list_ease/services/database/database.dart';
 import 'package:provider/provider.dart';
 
 class AddCategories extends StatelessWidget {
-  const AddCategories({super.key});
+  final Category? category;
+
+  const AddCategories({Key? key, required this.category}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final homeProvider = Provider.of<HomeProvider>(context, listen: false);
+
+    if (category != null) {
+      String unicodeValue = category!.icon
+          .toUpperCase(); // Nilai Unicode dalam format heksadesimal
+
+      int codePoint = int.parse("0$unicodeValue",
+          radix: 16); // Mengonversi string heksadesimal menjadi integer
+
+      IconData icon = IconData(
+        codePoint,
+        fontFamily: 'MaterialIcons',
+      );
+
+      final colorString = category!.color;
+      Color color = Color(int.parse("0x$colorString"));
+
+      homeProvider.categoryController.text = category!.categoryName;
+      homeProvider.setSelectedColor = color;
+      homeProvider.setIcon = icon;
+    }
+
+    print(homeProvider.selectedColors);
 
     // final icon = homeProvider.icon;
 
@@ -42,7 +69,7 @@ class AddCategories extends StatelessWidget {
                     scrollPadding: const EdgeInsets.all(0),
                     controller: homeProvider.categoryController,
                     style: const TextStyle(
-                        fontSize: 18, color: ColorApp.borderColor),
+                        fontSize: 18, color: ColorApp.primaryTextColor),
                     decoration: const InputDecoration(
                       hintText: "Category name",
                       hintStyle:
@@ -111,17 +138,16 @@ class AddCategories extends StatelessWidget {
                             final isSelected =
                                 colors == homeProvider.selectedColors;
 
-                            print(isSelected);
-
                             return GestureDetector(
                               onTap: () {
                                 homeProvider.selectColors(colors);
                                 Color materialColor = colors;
                                 int colorValue = materialColor.value;
-                                String colorHex =
-                                    colorValue.toRadixString(16).toUpperCase();
+                                String colorHex = colorValue.toRadixString(16);
                                 homeProvider.getColor(colorHex);
-                                print(homeProvider.colorCategory);
+                                // print(homeProvider.selectColors(colors));
+                                print(homeProvider.selectedColors);
+                                // print(homeProvider.colorCategory);
                               },
                               child: Container(
                                 padding: const EdgeInsets.all(5),
@@ -142,6 +168,60 @@ class AddCategories extends StatelessWidget {
                         ),
                       ),
                     ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  Visibility(
+                    visible: category != null ? true : false,
+                    child: TextButton(
+                      style: TextButton.styleFrom(
+                          padding: const EdgeInsets.all(0)),
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: const Text("Peringatan"),
+                              content: const Text(
+                                  "Are you sure you want to delete this category ?"),
+                              actions: <Widget>[
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: const Text("Cancel"),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    homeProvider.database
+                                        .deleteKategoriRepo(category!.id);
+                                    Navigator.of(context).pushReplacement(
+                                      MaterialPageRoute(
+                                        builder: (context) => const MainPage(),
+                                      ),
+                                    );
+                                    homeProvider.addCategoryClear();
+                                  },
+                                  child: const Text("Yes"),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                      child: const Row(
+                        children: [
+                          Icon(CupertinoIcons.delete,
+                              color: ColorApp.errorColor),
+                          SizedBox(width: 10),
+                          Text(
+                            "Delete Category",
+                            style: TextStyle(
+                                fontSize: 16, color: ColorApp.errorColor),
+                          )
+                        ],
+                      ),
+                    ),
                   )
                 ],
               ),
@@ -157,6 +237,7 @@ class AddCategories extends StatelessWidget {
                     ),
                     onPressed: () {
                       Navigator.of(context).pop();
+                      homeProvider.addCategoryClear();
                     },
                     child: const Text(
                       "Cencel",
@@ -173,42 +254,78 @@ class AddCategories extends StatelessWidget {
                           vertical: 12, horizontal: 19),
                     ),
                     onPressed: () {
-                      if (homeProvider.iconCategory != null &&
-                          homeProvider.colorCategory != null) {
-                        homeProvider.insert(
-                          homeProvider.categoryController.text,
-                          homeProvider.iconCategory ?? "f447",
-                          homeProvider.colorCategory ?? "FF4CAF50",
-                        );
-                        homeProvider.addCategoryClear();
-                        Navigator.of(context).pop();
+                      if (category == null) {
+                        if (homeProvider.iconCategory != null &&
+                            homeProvider.colorCategory != null) {
+                          homeProvider.insert(
+                            homeProvider.categoryController.text,
+                            homeProvider.iconCategory ?? "f447",
+                            homeProvider.colorCategory ?? "FF4CAF50",
+                          );
+                          homeProvider.addCategoryClear();
+                          Navigator.of(context).pop();
+                        } else {
+                          // Salah satu atau lebih dari tiga nilai tersebut kosong (null).
+                          // Tampilkan peringatan menggunakan showDialog.
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: const Text("Warning"),
+                                content: const Text(
+                                    "Please fill in all fields before continuing."),
+                                actions: <Widget>[
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context)
+                                          .pop(); // Tutup dialog peringatan.
+                                    },
+                                    child: const Text("OK"),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        }
                       } else {
-                        // Salah satu atau lebih dari tiga nilai tersebut kosong (null).
-                        // Tampilkan peringatan menggunakan showDialog.
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              title: const Text("Peringatan"),
-                              content: const Text(
-                                  "Harap isi semua field sebelum melanjutkan."),
-                              actions: <Widget>[
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.of(context)
-                                        .pop(); // Tutup dialog peringatan.
-                                  },
-                                  child: const Text("OK"),
-                                ),
-                              ],
-                            );
-                          },
-                        );
+                        if (homeProvider.iconCategory != null &&
+                            homeProvider.colorCategory != null) {
+                          homeProvider.update(
+                            category!.id,
+                            homeProvider.categoryController.text,
+                            homeProvider.iconCategory ?? "f447",
+                            homeProvider.colorCategory ?? "FF4CAF50",
+                          );
+                          homeProvider.addCategoryClear();
+                          Navigator.of(context).pop();
+                        } else {
+                          // Salah satu atau lebih dari tiga nilai tersebut kosong (null).
+                          // Tampilkan peringatan menggunakan showDialog.
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: const Text("Warning"),
+                                content: const Text(
+                                    "Please fill in all fields before continuing."),
+                                actions: <Widget>[
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context)
+                                          .pop(); // Tutup dialog peringatan.
+                                    },
+                                    child: const Text("OK"),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        }
                       }
                     },
-                    child: const Text(
-                      "Create Category",
-                      style: TextStyle(
+                    child: Text(
+                      category != null ? "Update Category" : "Create Category",
+                      style: const TextStyle(
                           fontSize: 16, color: ColorApp.primaryTextColor),
                     ),
                   ),
