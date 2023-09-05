@@ -78,7 +78,7 @@ class AppDb extends _$AppDb {
     return (delete(categories)..where((tbl) => tbl.id.equals(id))).go();
   }
 
-  Stream<List<ToDosWithCategory>> getToDosByDateRepo(DateTime date) {
+  Stream<List<ToDosWithCategory>> getToDosByDateRepo(DateTime date, bool isComplete) {
     final query = select(toDos).join(
       [
         innerJoin(
@@ -86,7 +86,7 @@ class AppDb extends _$AppDb {
           categories.id.equalsExp(toDos.category_id),
         ),
       ],
-    )..where(toDos.date.equals(date));
+    )..where(toDos.date.equals(date) & toDos.isCompleted.equals(isComplete));
 
     return query.watch().map(
       (rows) {

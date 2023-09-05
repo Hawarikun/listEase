@@ -11,31 +11,42 @@ class HomeProvider extends ChangeNotifier {
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _categoryController = TextEditingController();
 
+  DateTime? _selectedDate;
   DateTime? _datePicked;
+  DateTime? _currentDate;
+
+  TimeOfDay? _currentTime;
+
+  String _dropdownValue = "Today";
   String? _timePicked;
   String? _colorCategory;
   String? _iconCategory;
+
+  bool _filter = false;
 
   IconData? _iconData;
   Color? _selectedColors;
 
   // IconData? _icon;
 
-  DateTime? _currentDate;
-  TimeOfDay? _currentTime;
-
   TextEditingController get titleController => _titleController;
   TextEditingController get descriptionController => _descriptionController;
   TextEditingController get categoryController => _categoryController;
 
+  DateTime? get selectedDate => _selectedDate;
   DateTime? get datePicked => _datePicked;
+  DateTime? get currentDate => _currentDate;
+
+  TimeOfDay? get currentTime => _currentTime;
+
+  String get dropdownValue => _dropdownValue;
   String? get timePicked => _timePicked;
   String? get colorCategory => _colorCategory;
   String? get iconCategory => _iconCategory;
 
+  bool get filter => _filter;
+
   IconData? get icon => _iconData;
-  DateTime? get currentDate => _currentDate;
-  TimeOfDay? get currentTime => _currentTime;
   Color? get selectedColors => _selectedColors;
 
   Category? selectedCategory;
@@ -44,17 +55,35 @@ class HomeProvider extends ChangeNotifier {
     _datePicked = value;
   }
 
+  set setTimePicked(DateTime value) {
+    _datePicked = value;
+  }
+
   set setSelectedColor(Color? color) {
     _selectedColors = color;
   }
 
-  set setTimePicked(DateTime value) {
-    _datePicked = value;
+  set setDropdownValue(String newValue) {
+    _dropdownValue = newValue;
+
+    notifyListeners();
+  }
+
+  set setFilter(bool value) {
+    _filter = value;
+
+    notifyListeners();
   }
 
   set setIcon(IconData? icon) {
     _iconData = icon;
     // notifyListeners();
+  }
+
+  void setSelectedDate(DateTime? date) {
+    _selectedDate = date;
+
+    notifyListeners();
   }
 
   void getColor(String color) {
