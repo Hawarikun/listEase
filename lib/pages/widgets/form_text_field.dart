@@ -12,6 +12,7 @@ Widget formTextField(TextEditingController controller, String hintText) {
       contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
       isDense: true,
       border: const OutlineInputBorder(borderSide: BorderSide.none),
+      focusColor: ColorApp.primaryTextColor,
       focusedBorder: const OutlineInputBorder(
         borderSide: BorderSide(
           color: ColorApp.borderColor,

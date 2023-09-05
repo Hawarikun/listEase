@@ -62,6 +62,20 @@ class AppDb extends _$AppDb {
     );
   }
 
+  Future updateTitleTodosRepo(
+      int id, String title, String description) async {
+    return (update(toDos)
+          ..where(
+            (tbl) => tbl.id.equals(id),
+          ))
+        .write(
+      ToDosCompanion(
+        title: Value(title),
+        description: Value(description),
+      ),
+    );
+  }
+
   Future updateIsCompleteToDos(int id, bool value) {
     return (update(toDos)
           ..where(

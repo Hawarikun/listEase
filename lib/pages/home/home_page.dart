@@ -23,6 +23,7 @@ class HomePage extends StatelessWidget {
     int year = now.year;
     DateTime currentDate = DateTime(year, month, day);
 
+
     print(homeProvider.database);
     return Scaffold(
       body: SafeArea(

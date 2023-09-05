@@ -22,7 +22,7 @@ class HomeProvider extends ChangeNotifier {
   String? _colorCategory;
   String? _iconCategory;
 
-  bool _filter = false;
+  bool _filter = true;
 
   IconData? _iconData;
   Color? _selectedColors;
@@ -193,6 +193,12 @@ class HomeProvider extends ChangeNotifier {
   Future update(
       int newId, String newName, String newIcon, String newColor) async {
     return await database.updateKategoriRepo(newId, newName, newIcon, newColor);
+  }
+
+  Future updateTodosTitle(
+      int newId, String newTitle, String newDescription) async {
+    notifyListeners();
+    return await database.updateTitleTodosRepo(newId, newTitle, newDescription);
   }
 
   void updateIsComplete(int id, bool newCondition) async {

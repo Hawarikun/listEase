@@ -17,11 +17,9 @@ class AddCategories extends StatelessWidget {
     final homeProvider = Provider.of<HomeProvider>(context, listen: false);
 
     if (category != null) {
-      String unicodeValue = category!.icon
-          .toUpperCase(); // Nilai Unicode dalam format heksadesimal
+      String unicodeValue = category!.icon.toUpperCase();
 
-      int codePoint = int.parse("0$unicodeValue",
-          radix: 16); // Mengonversi string heksadesimal menjadi integer
+      int codePoint = int.parse("0$unicodeValue", radix: 16);
 
       IconData icon = IconData(
         codePoint,
