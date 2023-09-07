@@ -62,16 +62,19 @@ class AppDb extends _$AppDb {
     );
   }
 
-  Future updateTitleTodosRepo(
-      int id, String title, String description) async {
+  Future updateTodosRepo(int id, int idCategory, String title, String description, DateTime date, String time, bool isComplate) async {
     return (update(toDos)
           ..where(
             (tbl) => tbl.id.equals(id),
           ))
         .write(
       ToDosCompanion(
+        category_id: Value(idCategory),
         title: Value(title),
         description: Value(description),
+        date: Value(date),
+        time: Value(time),
+        isCompleted: Value(isComplate),
       ),
     );
   }
@@ -92,7 +95,12 @@ class AppDb extends _$AppDb {
     return (delete(categories)..where((tbl) => tbl.id.equals(id))).go();
   }
 
-  Stream<List<ToDosWithCategory>> getToDosByDateRepo(DateTime date, bool isComplete) {
+  Future deleteTodosRepo(int id) async {
+    return (delete(toDos)..where((tbl) => tbl.id.equals(id))).go();
+  }
+
+  Stream<List<ToDosWithCategory>> getToDosByDateRepo(
+      DateTime date, bool isComplete) {
     final query = select(toDos).join(
       [
         innerJoin(

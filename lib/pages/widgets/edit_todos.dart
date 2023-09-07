@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:list_ease/constant/colors.dart';
 import 'package:list_ease/models/ToDosWithCategory.dart';
@@ -17,7 +16,6 @@ class EditToDos extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final homeProvider = Provider.of<HomeProvider>(context, listen: false);
-    final formatted = DateFormat("E, d MMM y").format(data.toDos.date);
 
     DateTime now = DateTime.now();
     int day = now.day;
@@ -25,7 +23,34 @@ class EditToDos extends StatelessWidget {
     int year = now.year;
     DateTime currentDate = DateTime(year, month, day);
 
-    homeProvider.selectedCategory = data.category;
+    TimeOfDay stringToTimeOfDay(String time) {
+      final parts = time.split(':');
+      final hour = int.parse(parts[0]);
+      final minute = int.parse(parts[1]);
+      return TimeOfDay(hour: hour, minute: minute);
+    }
+
+    if (homeProvider.title == null &&
+        homeProvider.description == null &&
+        homeProvider.selectedCategory == null &&
+        homeProvider.currentDate == null &&
+        homeProvider.timePicked == null &&
+        homeProvider.currentTime == null &&
+        homeProvider.isComplate == null &&
+        homeProvider.formattedDate == null) {
+      homeProvider.setTitle = data.toDos.title;
+      homeProvider.setDescription = data.toDos.description;
+      homeProvider.setSelectedCategory = data.category;
+      homeProvider.setCurrentDate = data.toDos.date;
+      homeProvider.setTimePicked = data.toDos.time;
+      homeProvider.setCurrentTime = stringToTimeOfDay(homeProvider.timePicked!);
+      homeProvider.setIsComplete = !data.toDos.isCompleted;
+      homeProvider.setFormattedDate = data.toDos.date;
+    }
+
+    print(homeProvider.selectedCategory);
+    print(homeProvider.isComplate);
+    print("Build Ulang");
 
     return Scaffold(
       body: SafeArea(
@@ -37,96 +62,98 @@ class EditToDos extends StatelessWidget {
               IconButton(
                 onPressed: () {
                   Navigator.of(context).pop();
+                  homeProvider.clear();
                 },
                 icon: const Icon(
                   Ionicons.close_outline,
                   color: ColorApp.primaryTextColor,
                 ),
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Consumer<HomeProvider>(
-                        builder: (context, homeProvider, _) => Checkbox(
-                          value: !data.toDos.isCompleted,
+              Consumer<HomeProvider>(
+                builder: (context, _, __) => Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Checkbox(
+                          value: homeProvider.isComplate ?? false,
                           onChanged: (value) {
-                            homeProvider.updateIsComplete(
-                                data.toDos.id, !data.toDos.isCompleted);
-                            print(data.toDos.isCompleted);
+                            print("Before update: ${homeProvider.isComplate}");
+                            homeProvider.setIsComplete =
+                                !(homeProvider.isComplate ?? false);
+                            print("After update: ${homeProvider.isComplate}");
                           },
                           activeColor: ColorApp.secondColor,
                           shape: const CircleBorder(),
                         ),
-                      ),
-                      const SizedBox(width: 10),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SizedBox(height: 8),
-                          Text(
-                            data.toDos.title,
-                            style: const TextStyle(
-                              fontSize: 20,
-                              color: ColorApp.primaryTextColor,
+                        const SizedBox(width: 10),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 8),
+                            Text(
+                              homeProvider.title ?? "",
+                              style: const TextStyle(
+                                fontSize: 20,
+                                color: ColorApp.primaryTextColor,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 15),
-                          Text(
-                            data.toDos.description,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: ColorApp.borderColor,
-                            ),
-                          )
-                        ],
-                      ),
-                    ],
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      showEditTitleTodos(data, context);
-                    },
-                    icon: const Icon(
-                      Icons.edit_square,
-                      color: ColorApp.primaryTextColor,
+                            const SizedBox(height: 15),
+                            Text(
+                              homeProvider.description ?? "",
+                              style: const TextStyle(
+                                fontSize: 16,
+                                color: ColorApp.borderColor,
+                              ),
+                            )
+                          ],
+                        ),
+                      ],
                     ),
-                  )
-                ],
+                    IconButton(
+                      onPressed: () {
+                        showEditTitleTodos(data, context);
+                      },
+                      icon: const Icon(
+                        Icons.edit_square,
+                        color: ColorApp.primaryTextColor,
+                      ),
+                    )
+                  ],
+                ),
               ),
               const SizedBox(height: 38),
-              listWidget(
-                context,
-                data,
-                Ionicons.time_outline,
-                "Task Time :",
-                data.toDos.date == currentDate
-                    ? "Today At ${data.toDos.time}"
-                    : "$formatted At ${data.toDos.time}",
-                iconContent: "",
+              Consumer<HomeProvider>(
+                builder: (context, _, __) => listWidget(
+                  context,
+                  data,
+                  Ionicons.time_outline,
+                  "Task Time :",
+                  homeProvider.currentDate == currentDate
+                      ? "Today At ${homeProvider.timePicked}"
+                      : "${homeProvider.formattedDate} At ${homeProvider.timePicked}",
+                  iconContent: "",
+                  onTap: () {
+                    homeProvider.selectDate(context);
+                  },
+                ),
               ),
               const SizedBox(height: 34),
-              // GestureDetector(
-              //   onTap: () {
-              //     print("Tapped");
-              //     showCategoryDialog(context);
-              //   },
-              listWidget(
-                context,
-                data,
-                CupertinoIcons.tag,
-                "Task Category :",
-                data.category.categoryName,
-                iconContent: data.category.icon,
-                onTap: () {
-                  showCategoryDialog(context);
-                  print("Tapped");
-                },
+              Consumer<HomeProvider>(
+                builder: (context, _, __) => listWidget(
+                  context,
+                  data,
+                  CupertinoIcons.tag,
+                  "Task Category :",
+                  homeProvider.selectedCategory?.categoryName ?? "",
+                  iconContent: homeProvider.selectedCategory?.icon ?? "",
+                  onTap: () {
+                    showCategoryDialog(context);
+                  },
+                ),
               ),
-              // ),
               const SizedBox(height: 29),
               Padding(
                 padding: const EdgeInsets.only(left: 12),
@@ -137,7 +164,7 @@ class EditToDos extends StatelessWidget {
                       context: context,
                       builder: (BuildContext context) {
                         return AlertDialog(
-                          title: const Text("Peringatan"),
+                          title: const Text("Warning"),
                           content: const Text(
                               "Are you sure you want to delete this List ?"),
                           actions: <Widget>[
@@ -149,6 +176,8 @@ class EditToDos extends StatelessWidget {
                             ),
                             TextButton(
                               onPressed: () {
+                                homeProvider.database
+                                    .deleteTodosRepo(data.toDos.id);
                                 Navigator.of(context).pushReplacement(
                                   MaterialPageRoute(
                                     builder: (context) => const MainPage(),
@@ -183,25 +212,67 @@ class EditToDos extends StatelessWidget {
       floatingActionButton: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
         child: SizedBox(
-          height: 50,
           width: MediaQuery.of(context).size.width,
-          child: FloatingActionButton.extended(
+          child: FloatingActionButton(
+            backgroundColor: ColorApp.secondColor,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(4),
             ),
-            backgroundColor: ColorApp.secondColor,
-            onPressed: () {},
-            label: const Text(
-              "Edit Task",
-              style: TextStyle(
-                fontSize: 16,
-                color: ColorApp.primaryTextColor,
+            onPressed: () {
+              if (homeProvider.title == null &&
+                  homeProvider.description == null &&
+                  homeProvider.selectedCategory == null &&
+                  homeProvider.currentDate == null &&
+                  homeProvider.timePicked == null &&
+                  homeProvider.currentTime == null &&
+                  homeProvider.isComplate == null) {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text("Warning"),
+                      content: const Text(
+                          "Please fill in all fields before continuing."),
+                      actions: <Widget>[
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context)
+                                .pop(); // Tutup dialog peringatan.
+                          },
+                          child: const Text("OK"),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              } else {
+                homeProvider.updateTodosTitle(
+                  data.toDos.id,
+                  homeProvider.selectedCategory?.id ?? 100,
+                  homeProvider.titleController.text,
+                  homeProvider.descriptionController.text,
+                  homeProvider.datePicked ?? DateTime.now(),
+                  homeProvider.timePicked ?? "",
+                  homeProvider.isComplate ?? true,
+                );
+                Navigator.of(context).pop();
+                homeProvider.clear();
+              }
+            },
+            child: const Padding(
+              padding: EdgeInsets.symmetric(vertical: 12),
+              child: Text(
+                "Edit Task",
+                style: TextStyle(
+                  fontSize: 16,
+                  color: ColorApp.primaryTextColor,
+                ),
               ),
             ),
           ),
         ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 }
@@ -209,13 +280,12 @@ class EditToDos extends StatelessWidget {
 Widget listWidget(BuildContext context, ToDosWithCategory data, IconData icon,
     String title, String content,
     {String? iconContent, VoidCallback? onTap}) {
+  final homeProvider = Provider.of<HomeProvider>(context, listen: false);
+  final colorString = homeProvider.selectedCategory?.color ?? "";
+  Color color = Color(int.tryParse("0x$colorString") ?? 0);
 
-  final colorString = data.category.color;
-  Color color = Color(int.parse("0x$colorString"));
-
-
-  String unicodeValue = iconContent!.toUpperCase();
-  int codePoint = int.parse("0$unicodeValue", radix: 16);
+  String unicodeValue = iconContent?.toUpperCase() ?? "";
+  int codePoint = int.tryParse("0$unicodeValue", radix: 16) ?? 0;
   IconData iconCategory = IconData(
     codePoint,
     fontFamily: 'MaterialIcons',

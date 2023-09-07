@@ -39,9 +39,10 @@ class ListToDos extends StatelessWidget {
             child: Checkbox(
               value: !data.toDos.isCompleted,
               onChanged: (value) {
-                homeProvider.updateIsComplete(
-                    data.toDos.id, !data.toDos.isCompleted);
+                print("Before update: ${data.toDos.isCompleted}");
+                homeProvider.updateIsComplete(data, !data.toDos.isCompleted);
                 print(data.toDos.isCompleted);
+                print("After update: ${data.toDos.isCompleted}");
               },
               activeColor: ColorApp.secondColor,
               shape: const CircleBorder(),

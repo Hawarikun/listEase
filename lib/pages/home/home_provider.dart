@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_iconpicker/flutter_iconpicker.dart';
 import 'package:intl/intl.dart';
+import 'package:list_ease/models/ToDosWithCategory.dart';
 import 'package:list_ease/services/database/database.dart';
 
 class HomeProvider extends ChangeNotifier {
@@ -17,12 +18,16 @@ class HomeProvider extends ChangeNotifier {
 
   TimeOfDay? _currentTime;
 
+  String? _title;
+  String? _description;
   String _dropdownValue = "Today";
   String? _timePicked;
   String? _colorCategory;
   String? _iconCategory;
+  String? _formattedDate;
 
   bool _filter = true;
+  bool? _isComplete;
 
   IconData? _iconData;
   Color? _selectedColors;
@@ -39,34 +44,63 @@ class HomeProvider extends ChangeNotifier {
 
   TimeOfDay? get currentTime => _currentTime;
 
+  String? get title => _title;
+  String? get description => _description;
   String get dropdownValue => _dropdownValue;
   String? get timePicked => _timePicked;
   String? get colorCategory => _colorCategory;
   String? get iconCategory => _iconCategory;
+  String? get formattedDate => _formattedDate;
 
   bool get filter => _filter;
+  bool? get isComplate => _isComplete;
 
   IconData? get icon => _iconData;
   Color? get selectedColors => _selectedColors;
 
   Category? selectedCategory;
 
+  set setFormattedDate(DateTime date) {
+    _formattedDate = DateFormat("E, d MMM y").format(date);
+  }
+  
+  set setCurrentDate(DateTime date) {
+    _currentDate = date;
+  }
+
+  set setCurrentTime(TimeOfDay time) {
+    _currentTime = time;
+  }
+
   set setDatePicked(DateTime value) {
     _datePicked = value;
   }
 
-  set setTimePicked(DateTime value) {
-    _datePicked = value;
-  }
+  // set setTimePicked(DateTime value) {
+  //   _datePicked = value;
+  // }
 
   set setSelectedColor(Color? color) {
     _selectedColors = color;
   }
 
+  set setTitle(String title) {
+    _title = title;
+  }
+
+  set setDescription(String description) {
+    _description = description;
+  }
+
+
   set setDropdownValue(String newValue) {
     _dropdownValue = newValue;
 
     notifyListeners();
+  }
+
+  set setTimePicked(String time) {
+    _timePicked = time;
   }
 
   set setFilter(bool value) {
@@ -75,13 +109,41 @@ class HomeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  set setIsComplete(bool value) {
+    _isComplete = value;
+  }
+
   set setIcon(IconData? icon) {
     _iconData = icon;
     // notifyListeners();
   }
 
+  void updateTitleDescription(String title, String description) {
+    _title = title;
+    _description = description;
+
+    notifyListeners();
+  }
+
+  set setSelectedCategory(Category? category) {
+    selectedCategory = category;
+  }
+
   void setSelectedDate(DateTime? date) {
     _selectedDate = date;
+
+    notifyListeners();
+  }
+
+  void pickDate(DateTime date) {
+    _datePicked = date;
+    _currentDate = date;
+    notifyListeners();
+  }
+
+  void pickTime(String time, TimeOfDay timeOfDay) {
+    _timePicked = time;
+    _currentTime = timeOfDay;
 
     notifyListeners();
   }
@@ -99,6 +161,11 @@ class HomeProvider extends ChangeNotifier {
   void selectColors(Color? colors) {
     _selectedColors = colors;
 
+    notifyListeners();
+  }
+
+  void changeIsComplete(bool value) {
+    _isComplete = value;
     notifyListeners();
   }
 
@@ -145,9 +212,9 @@ class HomeProvider extends ChangeNotifier {
     );
 
     if (pickedDate != null) {
-      _currentDate = pickedDate;
+      _formattedDate = DateFormat("E, d MMM y").format(pickedDate);
 
-      _datePicked = pickedDate;
+      pickDate(pickedDate);
 
       TimeOfDay? pickedTime = await showTimePicker(
         initialEntryMode: TimePickerEntryMode.input,
@@ -156,16 +223,15 @@ class HomeProvider extends ChangeNotifier {
       );
 
       if (pickedTime != null) {
-        _currentTime = pickedTime;
         String formattedTime = DateFormat.Hm().format(
           DateTime(1, 1, 1, pickedTime.hour, pickedTime.minute),
         );
 
-        _timePicked = formattedTime;
+        pickTime(formattedTime, pickedTime);
       }
     }
 
-    notifyListeners();
+    // notifyListeners();
 
     print(_datePicked);
     print(_timePicked);
@@ -192,17 +258,37 @@ class HomeProvider extends ChangeNotifier {
 
   Future update(
       int newId, String newName, String newIcon, String newColor) async {
-    return await database.updateKategoriRepo(newId, newName, newIcon, newColor);
+    return await database.updateKategoriRepo(
+      newId,
+      newName,
+      newIcon,
+      newColor,
+    );
   }
 
   Future updateTodosTitle(
-      int newId, String newTitle, String newDescription) async {
-    notifyListeners();
-    return await database.updateTitleTodosRepo(newId, newTitle, newDescription);
+      int newId,
+      int newIdCategory,
+      String newTitle,
+      String newDescription,
+      DateTime newDate,
+      String newTime,
+      bool newIsComplete) async {
+    final row = await database.updateTodosRepo(
+      newId,
+      newIdCategory,
+      newTitle,
+      newDescription,
+      newDate,
+      newTime,
+      newIsComplete,
+    );
+
+    print(row);
   }
 
-  void updateIsComplete(int id, bool newCondition) async {
-    await database.updateIsCompleteToDos(id, newCondition);
+  void updateIsComplete(ToDosWithCategory data, bool newCondition) async {
+    await database.updateIsCompleteToDos(data.toDos.id, newCondition);
 
     notifyListeners();
   }
@@ -220,6 +306,7 @@ class HomeProvider extends ChangeNotifier {
             time: time,
             createdAt: now,
             updateedAt: now,
+            isCompleted: const Value(true),
           ),
         );
 
@@ -233,6 +320,10 @@ class HomeProvider extends ChangeNotifier {
     _currentTime = null;
     _datePicked = null;
     _timePicked = null;
+    _title = null;
+    _description = null;
+    _formattedDate = null;
+    _isComplete = null;
     selectCategory(null);
   }
 
