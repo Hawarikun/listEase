@@ -44,7 +44,7 @@ class EditToDos extends StatelessWidget {
       homeProvider.setCurrentDate = data.toDos.date;
       homeProvider.setTimePicked = data.toDos.time;
       homeProvider.setCurrentTime = stringToTimeOfDay(homeProvider.timePicked!);
-      homeProvider.setIsComplete = !data.toDos.isCompleted;
+      homeProvider.setIsComplete = data.toDos.isCompleted;
       homeProvider.setFormattedDate = data.toDos.date;
     }
 
@@ -78,11 +78,11 @@ class EditToDos extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Checkbox(
-                          value: homeProvider.isComplate ?? false,
+                          value: !(homeProvider.isComplate ?? false),
                           onChanged: (value) {
                             print("Before update: ${homeProvider.isComplate}");
-                            homeProvider.setIsComplete =
-                                !(homeProvider.isComplate ?? false);
+                            homeProvider.changeIsComplete(
+                                !(homeProvider.isComplate ?? false));
                             print("After update: ${homeProvider.isComplate}");
                           },
                           activeColor: ColorApp.secondColor,
@@ -248,12 +248,12 @@ class EditToDos extends StatelessWidget {
               } else {
                 homeProvider.updateTodosTitle(
                   data.toDos.id,
-                  homeProvider.selectedCategory?.id ?? 100,
-                  homeProvider.titleController.text,
-                  homeProvider.descriptionController.text,
-                  homeProvider.datePicked ?? DateTime.now(),
-                  homeProvider.timePicked ?? "",
-                  homeProvider.isComplate ?? true,
+                  homeProvider.selectedCategory?.id ?? data.category.id,
+                  homeProvider.title ?? data.toDos.title,
+                  homeProvider.description ?? data.toDos.description,
+                  homeProvider.datePicked ?? data.toDos.date,
+                  homeProvider.timePicked ?? data.toDos.time,
+                  homeProvider.isComplate ?? !data.toDos.isCompleted,
                 );
                 Navigator.of(context).pop();
                 homeProvider.clear();
