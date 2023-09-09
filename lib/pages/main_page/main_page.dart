@@ -70,7 +70,13 @@ class MainPage extends StatelessWidget {
           ],
           currentIndex: mainProvider.currentIndex,
           onTap: (index) {
-            mainProvider.changeIndex(index);
+            if (mainProvider.currentIndex == 0 && index == 3) {
+              mainProvider.changeIndex(2);
+              print('object');
+            } else {
+              mainProvider.changeIndex(index);
+            }
+            print(mainProvider.currentIndex);
           },
         ),
       ),
