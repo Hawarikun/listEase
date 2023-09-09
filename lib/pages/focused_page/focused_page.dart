@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:circular_countdown_timer/circular_countdown_timer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dnd/flutter_dnd.dart';
@@ -12,6 +14,9 @@ class FocusedPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Provider.of<FocusedProvider>(context, listen: false).loadInstalledApps();
+    Provider.of<FocusedProvider>(context, listen: false).getAppUsageInfo();
+
     final focusedProvider =
         Provider.of<FocusedProvider>(context, listen: false);
 
@@ -152,6 +157,60 @@ class FocusedPage extends StatelessWidget {
                     ),
                   ),
                 ),
+              ),
+
+              // statistic
+              const SizedBox(height: 40),
+              const Row(
+                children: [
+                  Text(
+                    "Overview",
+                    style: TextStyle(
+                        fontSize: 20, color: ColorApp.primaryTextColor),
+                  ),
+                ],
+              ),
+              FutureBuilder(
+                future: focusedProvider.sortInstalledAppsByUsage(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const CircularProgressIndicator();
+                  } else if (snapshot.hasError) {
+                    return Text('Error: ${snapshot.error}');
+                  } else {
+                    return ListView.builder(
+                      physics: const NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      itemCount: min(focusedProvider.installedApps.length, 10),
+                      itemBuilder: (context, index) {
+                        final app = focusedProvider.installedApps[index];
+                        final appUsageSeconds =
+                            focusedProvider.appUsage[app.packageName] ?? 0;
+                        final int appUsageMinutes =
+                            appUsageSeconds ~/ 60; // Konversi ke menit
+                        final int appUsageHours = appUsageMinutes ~/ 60; // Jam
+                        final int remainingMinutes = appUsageMinutes % 60;
+                        final String formattedTime =
+                            '$appUsageHours Hours $remainingMinutes Minutes';
+
+                        print(focusedProvider.appUsage[app.packageName] ?? 0);
+
+                        return ListTile(
+                          title: Text(
+                            app.appName,
+                            style: const TextStyle(
+                                color: ColorApp.primaryTextColor),
+                          ),
+                          subtitle: Text(
+                            'Usage: $formattedTime',
+                            style: const TextStyle(
+                                color: ColorApp.primaryTextColor),
+                          ),
+                        );
+                      },
+                    );
+                  }
+                },
               ),
             ],
           ),

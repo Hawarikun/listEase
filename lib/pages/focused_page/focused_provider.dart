@@ -1,8 +1,13 @@
+import 'package:app_usage/app_usage.dart';
 import 'package:circular_countdown_timer/circular_countdown_timer.dart';
+import 'package:device_apps/device_apps.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dnd/flutter_dnd.dart';
+import 'package:usage_stats/usage_stats.dart';
 
 class FocusedProvider extends ChangeNotifier {
+  List<Application> _installedApps = [];
+  Map<String, double> _appUsage = {};
   final CountDownController _countDownController = CountDownController();
   TimeOfDay? _time;
   bool _isStart = false;
@@ -11,6 +16,8 @@ class FocusedProvider extends ChangeNotifier {
   bool _isNotificationPolicyAccessGranted = false;
   String _filterName = '';
 
+  List<Application> get installedApps => _installedApps;
+  Map<String, double> get appUsage => _appUsage;
   CountDownController get countDownController => _countDownController;
   TimeOfDay? get time => _time;
   bool get isStart => _isStart;
@@ -91,4 +98,81 @@ class FocusedProvider extends ChangeNotifier {
 
     notifyListeners();
   }
+
+  Future<void> loadInstalledApps() async {
+    List<Application> apps = await DeviceApps.getInstalledApplications(
+      onlyAppsWithLaunchIntent: true,
+      includeSystemApps: false,
+    );
+
+    _installedApps = apps;
+
+    notifyListeners();
+  }
+
+  Future<void> getAppUsageInfo() async {
+    UsageStats.grantUsagePermission();
+
+    try {
+      final usageInfoList = await AppUsage().getAppUsage(
+        DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day,
+            0, 0, 0, 0),
+        DateTime.now(),
+      );
+
+      final Map<String, double> appUsage = {};
+
+      for (final info in usageInfoList) {
+        if (appUsage.containsKey(info.packageName)) {
+          appUsage[info.packageName] = (appUsage[info.packageName] ?? 0) +
+              info.usage.inSeconds.toDouble();
+        } else {
+          appUsage[info.packageName] = info.usage.inSeconds.toDouble();
+        }
+      }
+
+      _appUsage = appUsage;
+    } on AppUsageException catch (exception) {
+      print('Error: $exception');
+    }
+  }
+
+  Future<void> sortInstalledAppsByUsage() async {
+    await loadInstalledApps();
+    await getAppUsageInfo();
+
+    // Sort the installed apps by usage in descending order
+    _installedApps.sort((app1, app2) {
+      final double usage1 = _appUsage[app1.packageName] ?? 0;
+      final double usage2 = _appUsage[app2.packageName] ?? 0;
+      return usage2.compareTo(usage1);
+    });
+
+    notifyListeners();
+  }
+
+  // Future<void> getAppUsageInfo() async {
+  //   UsageStats.grantUsagePermission();
+  //   // if (isUsagePermissionGranted == true) {
+  //   //   // Izin akses pengguna diberikan, lakukan tindakan yang sesuai.
+  //   //   print('Izin akses pengguna diberikan.');
+  //   try {
+  //     DateTime endDate = DateTime.now();
+  //     DateTime startDate = endDate.subtract(const Duration(days: 7));
+
+  //     final infoList = await AppUsage().getAppUsage(startDate, endDate);
+
+  //     infoList.sort((a, b) => b.usage.compareTo(a.usage));
+
+  //     _appUsageInfoList = infoList;
+
+  //     notifyListeners();
+  //   } on AppUsageException catch (exception) {
+  //     print('Error: $exception');
+  //   }
+  //   // } else {
+  //   //   // Izin akses pengguna belum diberikan, mungkin perlu meminta izin.
+  //   //   print('Izin akses pengguna belum diberikan.');
+  //   // }
+  // }
 }
