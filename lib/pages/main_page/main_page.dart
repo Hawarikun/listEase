@@ -6,14 +6,38 @@ import 'package:list_ease/pages/focused_page/focused_page.dart';
 import 'package:list_ease/pages/home/home_page.dart';
 import 'package:list_ease/pages/main_page/main_provider.dart';
 import 'package:list_ease/pages/profil_page/profil_page.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
-class MainPage extends StatelessWidget {
+class MainPage extends StatefulWidget {
   const MainPage({super.key});
+
+  @override
+  State<MainPage> createState() => _MainPageState();
+}
+
+class _MainPageState extends State<MainPage> {
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final notificationPolicyStatus =
+          await Permission.accessNotificationPolicy.status;
+
+      if (notificationPolicyStatus.isDenied ||
+          notificationPolicyStatus.isPermanentlyDenied) {
+        final mainProvider = Provider.of<MainProvider>(context, listen: false);
+        mainProvider.requestNotificationPolicyAccess(context);
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final mainProvider = Provider.of<MainProvider>(context, listen: false);
+
+    // mainProvider.requestNotificationPolicyAccess(context);
 
     List<Widget> widgetOptions = <Widget>[
       const HomePage(),
