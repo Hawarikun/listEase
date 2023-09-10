@@ -103,6 +103,7 @@ class FocusedProvider extends ChangeNotifier {
     List<Application> apps = await DeviceApps.getInstalledApplications(
       onlyAppsWithLaunchIntent: true,
       includeSystemApps: false,
+      includeAppIcons: true,
     );
 
     _installedApps = apps;
