@@ -1,16 +1,7 @@
-# list_ease
+# ListEasy
 
-A new Flutter project.
+ListEasy adalah aplikasi mobile yang saya kembangkan dengan tujuan utama membantu pengguna dalam mengatur dan mengelola kegiatan atau tugas sehari-hari secara lebih efektif. Aplikasi ini dirancang menggunakan framework Flutter, yang dikenal fleksibel dalam pembuatan aplikasi lintas platform. Untuk mengelola status aplikasi, saya menggunakan Provider sebagai state management, yang memungkinkan pengelolaan data secara efisien dan responsif terhadap perubahan.
 
-## Getting Started
+Dari segi penyimpanan data, ListEasy memanfaatkan SQLite, yang memberikan performa penyimpanan lokal yang cepat dan ringan. Ini memungkinkan pengguna untuk menyimpan daftar kegiatan dan tugas mereka secara offline tanpa memerlukan koneksi internet.
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Selain fungsionalitas yang mumpuni, tampilan antarmuka juga menjadi fokus utama. Desain antarmuka pengguna (UI) aplikasi ini diadaptasi dari desain yang dibuat di Figma, yang kemudian dikonversi ke Flutter. Hasilnya adalah UI yang modern, intuitif, dan mudah digunakan, sehingga pengguna dapat merasakan pengalaman yang menyenangkan saat mengelola tugas-tugas mereka.
